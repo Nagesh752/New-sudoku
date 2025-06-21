@@ -28,13 +28,18 @@ function App() {
     localStorage.removeItem('sudoku_user');
   };
 
+  const handleUpdateUser = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem('sudoku_user', JSON.stringify(updatedUser));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       {!isLoggedIn ? (
         <LoginPage onLogin={handleLogin} />
       ) : (
         <GameProvider>
-          <SudokuGame user={user} onLogout={handleLogout} />
+          <SudokuGame user={user} onLogout={handleLogout} onUpdateUser={handleUpdateUser} />
         </GameProvider>
       )}
     </div>

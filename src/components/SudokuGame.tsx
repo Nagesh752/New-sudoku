@@ -2,19 +2,22 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { SudokuGrid } from './SudokuGrid';
 import { GameControls } from './GameControls';
 import { LevelComplete } from './LevelComplete';
+import { ProfileModal } from './ProfileModal';
 import { useGame } from '../contexts/GameContext';
-import { LogOut, Trophy, Clock } from 'lucide-react';
+import { LogOut, Trophy, Clock, User, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SudokuGameProps {
   user: any;
   onLogout: () => void;
+  onUpdateUser: (userData: any) => void;
 }
 
-export const SudokuGame: React.FC<SudokuGameProps> = ({ user, onLogout }) => {
+export const SudokuGame: React.FC<SudokuGameProps> = ({ user, onLogout, onUpdateUser }) => {
   const { 
     currentPuzzle, 
     userSolution, 
@@ -87,23 +90,59 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ user, onLogout }) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const handleUpdateProfile = (updatedUser: any) => {
+    onUpdateUser(updatedUser);
+  };
+
   return (
     <div className="min-h-screen p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
-              Sudoku Puzzle
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Welcome, {user.name || user.email?.split('@')[0] || 'Player'}!
-            </p>
+          <div className="flex items-center gap-4">
+            <ProfileModal user={user} onUpdateProfile={handleUpdateProfile}>
+              <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
+                <Avatar className="w-12 h-12 cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all">
+                  <AvatarImage src={user.profilePhoto} alt="Profile" />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                    {getInitials(user.name || user.email?.split('@')[0] || 'User')}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </ProfileModal>
+            
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
+                Sudoku Puzzle
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300">
+                Welcome, {user.name || user.email?.split('@')[0] || 'Player'}!
+              </p>
+            </div>
           </div>
-          <Button variant="outline" onClick={onLogout} className="flex items-center gap-2">
-            <LogOut className="w-4 h-4" />
-            Logout
-          </Button>
+          
+          <div className="flex items-center gap-2">
+            <ProfileModal user={user} onUpdateProfile={handleUpdateProfile}>
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Profile</span>
+              </Button>
+            </ProfileModal>
+            
+            <Button variant="outline" onClick={onLogout} className="flex items-center gap-2">
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </Button>
+          </div>
         </div>
 
         {/* Game Stats */}
@@ -187,6 +226,7 @@ export const SudokuGame: React.FC<SudokuGameProps> = ({ user, onLogout }) => {
           <CardContent className="p-4">
             <h3 className="font-semibold mb-2">How to Play:</h3>
             <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+              <li>• Tap your profile picture to edit your profile and upload a photo</li>
               <li>• Tap a cell to select it, then tap a number or use keyboard (1-9)</li>
               <li>• Use arrow keys to navigate between cells</li>
               <li>• Press Backspace/Delete to clear a cell</li>
